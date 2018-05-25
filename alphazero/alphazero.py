@@ -1,7 +1,6 @@
-from abc import ABC, abstractmethod
+### implementation of alphazero by James Parker. May 25th
 
-class Agent(ABC):
-
+def AlphaZero:
     @abstractmethod
     def get_action(self, state):
         pass

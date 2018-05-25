@@ -66,11 +66,20 @@ class Kalaha(Enviroment):
 
     # returns a set of valid actions
     def valid_actions(self):
-        if P1:
+        if self.turn == P1:
             stones = self.board.state[:WIDTH]
         else:
             stones = self.board.state[SIDE: -1]
         return [i for i, s in enumerate(stones) if s > 0]
+
+    def is_complete(self):
+        return sum(self.board.state[:WIDTH]) == 0 or \
+               sum(self.board.state[WIDTH - 1: -1]) == 0
+
+    def winner(self):
+        if not is_complete:
+            return None
+        return P1 if self.board.state[WIDTH] > self.board.state[-1] else P2
 
     def __str__(self):
         return str(self.board)

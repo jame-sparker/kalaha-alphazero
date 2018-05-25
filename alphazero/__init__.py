@@ -1,0 +1,3 @@
+HISTORY_SIZE = 10000
+
+CPUT = 1

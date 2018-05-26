@@ -2,8 +2,10 @@ from . import CPUCT
 import random
 
 class MCTree:
-    def __init__(self, iterations):
-        self.root = Node()
+    def __init__(self, env, evaluator, iterations):
+        self.evaluator = evaluator
+        children_p = evaluator.evaluate(env)
+        self.root = Node(env.valid_actions(), children_p)
         self.iterations = iterations
 
     # iterative implementation instead of recursion for efficiency.
@@ -17,7 +19,8 @@ class MCTree:
             visited_nodes = [current_node]
 
             while not current_state.is_complete():
-                current_node = current_node.select_child(current_state)
+                current_node = 
+                    current_node.select_child(current_state, self.evaluator)
                 visited_nodes.append(current_node)
 
             result = current_state.evaluate(player)
@@ -30,16 +33,27 @@ class MCTree:
         self.root = self.root.children[a]
         return a
 
+    def get_action_probabilities(self, T, n):
+        # n is the max number possible of actions
+        denominator = self.root.n ** (1 / T)
+
+        prob_dist = [0] * n
+        for action, child in self.root.children.items():
+            prob_dist[action] = child.n ** (1/T) / denominator
+
+        return prob_dist
+
     def select_action(self, T):
         # select action with probability of 
         # N(s_0, a) ^ (1 / T) / (sum_b N(s_0, b)) ^ (1 / T)
         # set denominator to 1 if T is 0 for greedy search.
-        if T == 0:
+        if T == 0: # greedy
             action_child_count_pair = []
             for action, child in self.root.children.items():
                 action_child_count_pair.append((action, child.n))
 
-            selected_action = max(action_child_count_pair, key=lambda x : x[1])[0]
+            selected_action =\
+                max(action_child_count_pair, key=lambda x : x[1])[0]
             return selected_action
 
         else:
@@ -54,34 +68,36 @@ class MCTree:
                     return action
 
 class Node:
-    def __init__(self, actions):
+    # this implementation does not directly expand all children nodes for
+    # space and time efficiency
+    def __init__(self, actions, children_evalutions):
         self.children = {}
         self.actions = actions
+        self.children_evalutions = children_evalutions
         self.n = 0 # visit count
         self.w = 0 # total action value
         self.q = 0 # mean action value
 
-    def select_child(self, env):
+    def select_child(self, env, evaluator):
         # select child using PUCT algorithm
-        prior = 1 / len(self.actions)
         sqrt_n = self.n ** 0.5
 
         def get_uct_score(action):
             child = self.children.get(action, None)
+            prior = children_evalutions[action]
             if child is None:
                 return CPUCT * sqrt_n * prior
             else:
                 return child.q + CPUCT * sqrt_n * prior / (1 + child.n)
 
-        best_a = None
-        best_value = -10
         value_action_pair = [(get_uct_score(a), a) for a in self.actions]
         selected_action = max(value_action_pair, key=lambda x : x[0])[1]
 
         env.playout(selected_action)
 
         if selected_action not in self.children:
-            self.children[selected_action] = Node(env.valid_actions())
+            self.children[selected_action] =\
+                Node(env.valid_actions(), evaluator.evaluate(env))
 
         return self.children[selected_action]
 

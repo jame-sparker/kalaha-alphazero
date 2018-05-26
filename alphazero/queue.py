@@ -1,5 +1,6 @@
 ### For storing history
 import random
+
 class Queue:
     def __init__(self, size):
         self.max_size = size
@@ -18,6 +19,6 @@ class Queue:
 
     # random samples with uniform distribution
     def random_samples(self, size):
-        return random.sample(self.array, size)
+        return random.sample(self.array, max(size, self.size))
 
 

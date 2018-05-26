@@ -13,7 +13,7 @@ class Queue:
             self.size += 1
         else:
             self.array[self.index] = item
-
+            
         self.index = (self.index + 1) % self.max_size
 
     # random samples with uniform distribution

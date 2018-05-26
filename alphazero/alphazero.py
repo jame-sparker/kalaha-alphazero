@@ -1,6 +1,12 @@
 ### implementation of alphazero by James Parker. May 25th
+from ..agent import Agent
 
-def AlphaZero:
+def AlphaZero(Agent):
+
+    def __init__(player):
+        self.player = player
+
+        
     def get_action(self, state):
         pass
 

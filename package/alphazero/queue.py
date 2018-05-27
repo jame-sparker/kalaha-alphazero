@@ -19,6 +19,14 @@ class Queue:
 
     # random samples with uniform distribution
     def random_samples(self, size):
-        return random.sample(self.array, max(size, self.size))
+        return random.sample(self.array, min(size, self.size))
+
+    def copy(self):
+        queue = Queue(self.size)
+        queue.size = self.size
+        queue.index = self.index
+        queue.array = self.array[:]
+        
+        return queue
 
 

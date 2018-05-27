@@ -4,22 +4,22 @@ import random
 class MCTree:
     def __init__(self, env, evaluator, iterations):
         self.evaluator = evaluator
-        children_p = evaluator.evaluate(env)
+        children_p = evaluator.evaluate(env.get_state())[0]
         self.root = Node(env.valid_actions(), children_p)
         self.iterations = iterations
 
     # iterative implementation instead of recursion for efficiency.
-    def search(env_copy, player):
+    def search(self, env_copy, player):
         """ Performs MCTS for self.iterations number of times
         """
         # requires a copy of the environment to simulate playout
         for _ in range(self.iterations):
             current_state = env_copy.copy()
-            current_node = self.node
+            current_node = self.root
             visited_nodes = [current_node]
 
             while not current_state.is_complete():
-                current_node = 
+                current_node = \
                     current_node.select_child(current_state, self.evaluator)
                 visited_nodes.append(current_node)
 
@@ -32,6 +32,13 @@ class MCTree:
         a = self.select_action(T)
         self.root = self.root.children[a]
         return a
+
+    def update(self, a, env):
+        if a in self.root.children:
+            self.root = self.root.children[a]
+        else:
+            children_p = self.evaluator.evaluate(env.get_state())[0]
+            self.root = Node(env.valid_actions(), children_p)
 
     def get_action_probabilities(self, T, n):
         # n is the max number possible of actions
@@ -70,10 +77,10 @@ class MCTree:
 class Node:
     # this implementation does not directly expand all children nodes for
     # space and time efficiency
-    def __init__(self, actions, children_evalutions):
+    def __init__(self, actions, children_evaluations):
         self.children = {}
         self.actions = actions
-        self.children_evalutions = children_evalutions
+        self.children_evaluations = children_evaluations
         self.n = 0 # visit count
         self.w = 0 # total action value
         self.q = 0 # mean action value
@@ -84,7 +91,7 @@ class Node:
 
         def get_uct_score(action):
             child = self.children.get(action, None)
-            prior = children_evalutions[action]
+            prior = self.children_evaluations[action]
             if child is None:
                 return CPUCT * sqrt_n * prior
             else:
@@ -97,7 +104,7 @@ class Node:
 
         if selected_action not in self.children:
             self.children[selected_action] =\
-                Node(env.valid_actions(), evaluator.evaluate(env))
+                Node(env.valid_actions(), evaluator.evaluate(env.get_state())[0])
 
         return self.children[selected_action]
 

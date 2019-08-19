@@ -1,5 +1,5 @@
 if __name__ == "__main__":
-    Enviroment = object
+    Environment = object
     STONES = 6
     SIDE = STONES + 1
     WIDTH = 6
@@ -20,7 +20,7 @@ class Kalaha(Environment):
     bmod = SIDE * 2 # board modulo
 
     def __init__(self, board = None):
-        self.action_size = SIDE
+        self.action_size = STONES
         self.turn = P1_bool
         if board is None:
             self.board = Board(STONES, WIDTH)
@@ -28,7 +28,7 @@ class Kalaha(Environment):
             self.board = board
 
     def get_turn(self):
-        return P2 if self.turn else P1
+        return P2 if self.turn == P2_bool else P1
 
     def get_action_size(self):
         return self.action_size
@@ -113,7 +113,16 @@ class Kalaha(Environment):
         return env_copy
 
     def __str__(self):
-        return str(self.board)
+        turn = "P1" if self.turn == P1_bool else "P2"
+        return str(self.board) + "\nTurn " + turn + " " + str(self.valid_actions())
 
     def reset(self):
         self.board = Board(STONES, WIDTH)
+        self.turn = P1_bool
+
+    def heuristic(self, player):
+        score = sum(self.board.state[:SIDE]) - sum(self.board.state[SIDE:])
+        if player == P1:
+            return score
+        else:
+            return -score

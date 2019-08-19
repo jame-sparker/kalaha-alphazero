@@ -99,3 +99,6 @@ class TicTacToe(Environment):
 
     def reset(self):
         self.board = Board()
+
+    def heuristic(self, *args):
+        return 0

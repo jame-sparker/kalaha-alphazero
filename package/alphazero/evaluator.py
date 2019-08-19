@@ -17,6 +17,8 @@ class Evaluator:
                 self.net = TwoLayerNetwork(*sizes)
             elif len(sizes) == 4:
                 self.net = ThreeLayerNetwork(*sizes)
+            elif len(sizes) == 5:
+                self.net = FourLayerNetwork(*sizes)
             else:
                 raise Error("Unexpected number of layers.")
 
@@ -24,10 +26,12 @@ class Evaluator:
                 self.net.parameters(), 
                 lr=LEARNING_RATE, 
                 momentum=0.9,
-                weight_decay=0.001
+                weight_decay=0.0001
                 )
         self.mseLossF = torch.nn.MSELoss()
         self.ceLossF = torch.nn.CrossEntropyLoss()
+        # self.ceLossF = torch.nn.NLLLoss()
+
     
     def train(self, inputs, prob_labels, value_labels):
         x = Variable(torch.Tensor(inputs).float())
@@ -37,8 +41,17 @@ class Evaluator:
         outputs = self.net(x)
         p = torch.stack((outputs[:, -1], 1 - outputs[:, -1]), 1)
         loss1 = self.ceLossF(p, y2)
+        print("--state--")
+        print(inputs[0])
+        print("--value--")
+        print(p[0].data)
+        print(y2[0].data)
         loss2 = self.mseLossF(outputs[:,:-1], y1)
+        print("--probs--")
+        print(outputs[0,:-1].data)
+        print(y1[0].data)
         total_loss = loss1 + loss2
+        print("Total Loss: ", total_loss.data)
 
         self.optimizer.zero_grad()
         total_loss.backward()
